@@ -1,0 +1,500 @@
+import React, { useState } from 'react';
+import { Send, Bot, User, Calendar, Clock, GraduationCap, Users, AlertCircle } from 'lucide-react';
+
+const GastianBasico = () => {
+  const [messages, setMessages] = useState([]);
+  const [inputMessage, setInputMessage] = useState('');
+
+  // Avatar mejorado para Gastión
+  const GastionAvatar = ({ size = 24 }) => {
+    return (
+      <svg width={size} height={size} viewBox="0 0 100 100" className="text-white">
+        <defs>
+          <linearGradient id="avatarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style={{stopColor:'#3b82f6', stopOpacity:1}} />
+            <stop offset="50%" style={{stopColor:'#1d4ed8', stopOpacity:1}} />
+            <stop offset="100%" style={{stopColor:'#1e3a8a', stopOpacity:1}} />
+          </linearGradient>
+          <linearGradient id="faceGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style={{stopColor:'#60a5fa', stopOpacity:1}} />
+            <stop offset="100%" style={{stopColor:'#3b82f6', stopOpacity:1}} />
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge> 
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        
+        <rect x="25" y="60" width="50" height="35" rx="8" fill="url(#avatarGradient)" />
+        <rect x="30" y="20" width="40" height="45" rx="12" fill="url(#faceGradient)" />
+        <rect x="35" y="28" width="30" height="25" rx="6" fill="#1e293b" opacity="0.8" />
+        <circle cx="42" cy="37" r="3" fill="#06b6d4" filter="url(#glow)" />
+        <circle cx="58" cy="37" r="3" fill="#06b6d4" filter="url(#glow)" />
+        <circle cx="43" cy="36" r="1" fill="#ffffff" opacity="0.8" />
+        <circle cx="59" cy="36" r="1" fill="#ffffff" opacity="0.8" />
+        <path d="M 45 45 Q 50 49 55 45" stroke="#06b6d4" strokeWidth="2" fill="none" strokeLinecap="round" />
+        <rect x="49" y="15" width="2" height="8" fill="url(#avatarGradient)" />
+        <circle cx="50" cy="13" r="3" fill="#fbbf24" opacity="0.9" />
+        <rect x="35" y="70" width="8" height="3" rx="1" fill="#1e293b" opacity="0.6" />
+        <rect x="57" y="70" width="8" height="3" rx="1" fill="#1e293b" opacity="0.6" />
+        <text x="50" y="82" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold" fontFamily="Arial">G</text>
+      </svg>
+    );
+  };
+
+  // Base de información administrativa básica
+  const respuestas = {
+    fechas: `📅 **PARCIALES 2025:**
+• **1er Parcial:** 26/09 al 03/10/2025
+• **Recuperatorio 1er Parcial:** 10/10 al 17/10/2025
+• **2do Parcial:** 07/11 al 14/11/2025
+• **Recuperatorio 2do Parcial:** 15/11 al 20/11/2025
+• **Modalidad:** Virtual`,
+
+    parciales: `📝 **PARCIALES 2025:**
+• **1er Parcial:** 26/09 al 03/10/2025
+• **Recuperatorio 1er Parcial:** 10/10 al 17/10/2025
+• **2do Parcial:** 07/11 al 14/11/2025
+• **Recuperatorio 2do Parcial:** 15/11 al 20/11/2025
+• **Modalidad:** Virtual`,
+
+    horarios: `⏰ **HORARIOS DE CURSADO 2025:**
+• **Clases Virtuales Sincrónicas (AVS):** Viernes 18:00 hs
+• **Duración del cursado:** 04/08/2025 al 21/11/2025
+• **4 Unidades temáticas** con clases semanales
+• **Campus virtual:** Disponible 24/7
+
+**📅 Cronograma detallado:** Libro "Información de la Materia"`,
+
+    docentes: `👩‍🏫 **EQUIPO DOCENTE:**
+• **Profesora Titular:** Marina Mattarolo
+• **Profesores Adjuntos:** 
+  - Pablo Escaf
+  - Pablo Palmieri  
+  - Natanael Soberón
+• **Presentaciones:** Disponibles en el libro "Información de la Materia"`,
+
+    aprobacion: `✅ **CONDICIONES DE APROBACIÓN 2025:**
+
+**📋 REGULARIDAD (Requisito obligatorio):**
+• **12 actividades de regularidad** durante el cuatrimestre
+• **Aprobar mínimo 9 actividades** para obtener regularidad
+• **IMPORTANTE:** La regularidad es independiente de los parciales
+
+**📝 EVALUACIONES PARCIALES:**
+• **2 trabajos parciales grupales** (obligatorios)
+• 1er Parcial: Mitad del cuatrimestre
+• 2do Parcial: Final del cuatrimestre
+• **Los parciales son las únicas instancias con recuperación**
+
+**⚠️ CONDICIONES CRÍTICAS:**
+• **Sin regularidad = Recursado** (aunque apruebes parciales)
+• **Sin aprobar parciales = Recursado** (aunque tengas regularidad)
+• **Ambos requisitos son independientes y obligatorios**
+
+**📖 Información completa:** Contrato Pedagógico en "Información de la Materia"`,
+
+    regularidad: `📋 **ACTIVIDADES DE REGULARIDAD:**
+• **Total:** 12 actividades durante el cuatrimestre
+• **Requisito:** Aprobar mínimo 9 actividades
+• **Carácter:** Obligatorio e independiente de parciales
+• **Consecuencia:** Sin regularidad = Recursado automático
+
+**⚠️ IMPORTANTE:** 
+Puedes aprobar todos los parciales, pero si no tienes regularidad, debes recursar la materia.
+
+**📖 Detalles completos:** Contrato Pedagógico`,
+
+    ausencias: `👥 **AUSENCIAS Y FALTAS:**
+• **En EaD NO tomamos asistencia**
+• **Clases sincrónicas NO son obligatorias**
+• **Grabaciones disponibles** siempre que las necesites
+• **Sin justificaciones requeridas** para faltas
+
+**💡 Flexibilidad total:** Podes manejar tus tiempos según tu disponibilidad`,
+
+    grupos: `👥 **FORMACIÓN DE GRUPOS:**
+• **Los grupos los conforman los estudiantes** durante las primeras semanas
+• **Revisar pautas de conformación** presentadas en la Unidad 1
+• **Información detallada:** Disponible en materiales de la Unidad 1
+
+**📚 ¿Dónde encontrar las pautas?** Material de la Unidad 1`,
+
+    contrato: `📜 **CONTRATO PEDAGÓGICO 2025:**
+
+**🎯 Objetivos:** Condiciones de cursada, responsabilidades y criterios de evaluación
+
+**📋 REGULARIDAD:**
+• 12 actividades - Aprobar mínimo 9
+• Requisito independiente de parciales
+
+**📝 PARCIALES:**
+• 2 trabajos grupales obligatorios  
+• Únicos con posibilidad de recuperación
+
+**👤 RESPONSABILIDAD:**
+• Gestión autónoma del aprendizaje
+• Planificación y cumplimiento de plazos
+• Comunicación oportuna ante dificultades
+
+**📖 Documento completo:** Libro "Información de la Materia"`,
+
+    "primeros pasos": `📋 **PRIMEROS PASOS EN LA MATERIA:**
+
+**1. 📖 Leer "Información de la materia"**
+• Primer paso fundamental para familiarizarte con objetivos y contenidos
+
+**2. 📅 Descargar el cronograma y calendario académico**
+• Tu guía temporal para todo el curso
+• 📅 **CALENDARIO ACADÉMICO OFICIAL**
+• 👉 **DESCARGAR AQUÍ:** https://centrodeelearning.com/documentos/calendario_academico_2024_carreras.pdf
+• Clave para cumplir fechas importantes
+
+**3. 📜 Leer "Reglamento Ético y de Convivencia"**
+• Normas de convivencia en foros e interacciones
+• Ambiente de aprendizaje positivo y respetuoso
+
+**4. 👥 Presentarte en el Foro de bienvenida**
+• Construir red de apoyo entre compañeros
+• Establecer presencia activa en el curso
+
+**5. 📢 Revisar Foro de Novedades periódicamente**
+• Principal fuente de actualizaciones del curso
+• Cambios en cronograma y anuncios importantes
+
+**6. 📊 Leer criterios de evaluación**
+• Entender cómo serás evaluado
+• Ponderaciones y metodología de calificación`,
+
+    actividades: `📚 **ACTIVIDADES DEL CURSO:**
+
+**📖 MATERIALES DE ESTUDIO:**
+• **Dos formatos disponibles:** Interactivo (libros con videos/podcast) o PDF lineal
+• Base del conocimiento teórico del curso
+
+**🎥 CLASES EN VIVO:**
+• **No obligatorias** pero recomendadas
+• Interacción directa con tutores y compañeros
+• **Grabaciones disponibles** si no puedes asistir
+• Dinámicas interactivas
+
+**🔬 ACTIVIDADES E-LAB:**
+• Experimentación para consolidar conocimientos
+• Preparación para exámenes y evaluaciones
+
+**💬 FOROS DE DEBATE:**
+• Aprendizaje colaborativo
+• Compartir perspectivas y resolver dudas
+
+**✅ ACTIVIDADES DE REGULARIZACIÓN:**
+• **12 actividades totales** por cuatrimestre  
+• **Aprobar mínimo 9** para regularizar
+• **Cruciales** para trasladar teoría a práctica`,
+
+    calendario: `📆 **CALENDARIO ACADÉMICO 2025:**
+
+**🔵 UNIDAD 1:** 04/08/2025 al 31/08/2025
+• AVS: 08/08, 15/08, 22/08, 29/08 (Viernes 18:00 hs)
+
+**🔵 UNIDAD 2:** 01/09/2025 al 28/09/2025  
+• AVS: 05/09, 12/09, 19/09, 26/09 (Viernes 18:00 hs)
+
+**🔵 UNIDAD 3:** 29/09/2025 al 25/10/2025
+• AVS: 03/10, 10/10, 17/10, 24/10 (Viernes 18:00 hs)
+
+**🔵 UNIDAD 4:** 26/10/2025 al 21/11/2025
+• AVS: 31/10, 07/11, 14/11 (Viernes 18:00 hs)
+
+**📝 EVALUACIONES:**
+• 1er Parcial: 26/09 al 03/10/2025
+• Recuperatorio 1er Parcial: 10/10 al 17/10/2025
+• 2do Parcial: 07/11 al 14/11/2025
+• Recuperatorio 2do Parcial: 15/11 al 20/11/2025
+
+**📖 Cronograma completo:** Libro "Información de la Materia"`,
+
+    "calendario academico": `📅 **CALENDARIO ACADÉMICO OFICIAL**
+👉 **DESCARGAR AQUÍ:** https://centrodeelearning.com/documentos/calendario_academico_2024_carreras.pdf
+• **Información:** Fechas institucionales, feriados, períodos de exámenes
+• **Importante:** Consultarlo desde el día 1 para planificar tu cursada
+
+**💡 Recomendación:** Descárgalo y tenelo siempre a mano`,
+
+    contacto: `📞 **INFORMACIÓN DE CONTACTO:**
+
+**📚 CONSULTAS ACADÉMICAS:**
+• Dudas sobre contenidos, actividades, evaluaciones
+• **Canal:** Foro de consultas en el campus virtual
+• **Responden:** Equipo docente
+
+**💬 ASUNTOS PERSONALES:**
+• Consultas privadas o situaciones particulares
+• **Canal:** Mensajería interna del campus virtual
+• **Responden:** Docentes
+
+**🔧 ASUNTOS ADMINISTRATIVOS/TÉCNICOS:**
+• Problemas técnicos, inscripciones, certificados
+• **Formulario:** https://centrodeelearning.my.site.com/ayuda/s/contactsupport
+• **También disponible:** Canal de WhatsApp
+• **Responde:** Soporte UTN`,
+
+    sistema: `💻 **SISTEMAS Y PLATAFORMAS:**
+• **Campus Virtual:** campus.utn.edu.ar
+• **Usuario:** Número de legajo
+• **Material:** Disponible en campus
+• **Comunicación:** Email + campus virtual
+• **Notas:** Se publican en SysAcad
+
+**📅 CALENDARIO ACADÉMICO OFICIAL**
+👉 **DESCARGAR AQUÍ:** https://centrodeelearning.com/documentos/calendario_academico_2024_carreras.pdf
+**Esencial desde el día 1** para planificar tu cursada`,
+
+    hola: '👋 ¡Hola! Soy Gastión, tu asistente para información administrativa de la materia Gestión del Conocimiento. Pregúntame sobre fechas, horarios, docentes, condiciones de aprobación, etc.'
+  };
+
+  const encontrarRespuesta = (mensaje) => {
+    const mensajeLimpio = mensaje.toLowerCase();
+    
+    if (mensajeLimpio.includes('hola') || mensajeLimpio.includes('buenos') || mensajeLimpio.includes('buenas')) {
+      return respuestas.hola;
+    }
+    if (mensajeLimpio.includes('aprobación') || mensajeLimpio.includes('aprobacion') || mensajeLimpio.includes('aprobar') || mensajeLimpio.includes('aprueba') || mensajeLimpio.includes('promocion') || mensajeLimpio.includes('promoción') || mensajeLimpio.includes('regular') || mensajeLimpio.includes('condiciones') || mensajeLimpio.includes('requisitos') || mensajeLimpio.includes('como se aprueba')) {
+      return respuestas.aprobacion;
+    }
+    if (mensajeLimpio.includes('primeros pasos') || mensajeLimpio.includes('comenzar') || mensajeLimpio.includes('empezar') || mensajeLimpio.includes('inicio') || mensajeLimpio.includes('primer') || mensajeLimpio.includes('que hago')) {
+      return respuestas["primeros pasos"];
+    }
+    if (mensajeLimpio.includes('actividades') || mensajeLimpio.includes('elab') || mensajeLimpio.includes('e-lab') || mensajeLimpio.includes('foros') || mensajeLimpio.includes('materiales') || mensajeLimpio.includes('clases') || mensajeLimpio.includes('vivo')) {
+      return respuestas.actividades;
+    }
+    if (mensajeLimpio.includes('regularidad') || mensajeLimpio.includes('recursado')) {
+      return respuestas.regularidad;
+    }
+    if (mensajeLimpio.includes('contrato') || mensajeLimpio.includes('pedagogico') || mensajeLimpio.includes('responsabilidad') || mensajeLimpio.includes('compromiso')) {
+      return respuestas.contrato;
+    }
+    if (mensajeLimpio.includes('ausencia') || mensajeLimpio.includes('ausente') || mensajeLimpio.includes('falta') || mensajeLimpio.includes('falto') || mensajeLimpio.includes('asistencia') || mensajeLimpio.includes('obligatoria')) {
+      return respuestas.ausencias;
+    }
+    if (mensajeLimpio.includes('grupo') || mensajeLimpio.includes('grupos') || mensajeLimpio.includes('agrupacion') || mensajeLimpio.includes('agrupación') || mensajeLimpio.includes('grupal') || mensajeLimpio.includes('formar')) {
+      return respuestas.grupos;
+    }
+    if (mensajeLimpio.includes('parcial') || mensajeLimpio.includes('examen') || mensajeLimpio.includes('evaluacion')) {
+      return respuestas.parciales;
+    }
+    if (mensajeLimpio.includes('fecha') || mensajeLimpio.includes('cuando') || mensajeLimpio.includes('cuándo') || mensajeLimpio.includes('septiembre') || mensajeLimpio.includes('octubre') || mensajeLimpio.includes('noviembre')) {
+      return respuestas.fechas;
+    }
+    if (mensajeLimpio.includes('horario') || mensajeLimpio.includes('hora') || mensajeLimpio.includes('aula') || mensajeLimpio.includes('avs') || mensajeLimpio.includes('sincronica') || mensajeLimpio.includes('viernes')) {
+      return respuestas.horarios;
+    }
+    if (mensajeLimpio.includes('docente') || mensajeLimpio.includes('profesor') || mensajeLimpio.includes('profe') || mensajeLimpio.includes('catedra') || mensajeLimpio.includes('marina') || mensajeLimpio.includes('mattarolo') || mensajeLimpio.includes('escaf') || mensajeLimpio.includes('palmieri') || mensajeLimpio.includes('soberon')) {
+      return respuestas.docentes;
+    }
+    if (mensajeLimpio.includes('calendario academico') || mensajeLimpio.includes('feriados') || mensajeLimpio.includes('institucional')) {
+      return respuestas["calendario academico"];
+    }
+    if (mensajeLimpio.includes('calendario') || mensajeLimpio.includes('cronograma') || mensajeLimpio.includes('unidad') || mensajeLimpio.includes('agosto') || mensajeLimpio.includes('cuatrimestre') || mensajeLimpio.includes('academico')) {
+      return respuestas.calendario;
+    }
+    if (mensajeLimpio.includes('contacto') || mensajeLimpio.includes('email') || mensajeLimpio.includes('consulta')) {
+      return respuestas.contacto;
+    }
+    if (mensajeLimpio.includes('campus') || mensajeLimpio.includes('sistema') || mensajeLimpio.includes('virtual')) {
+      return respuestas.sistema;
+    }
+    
+    return `🤔 **No estoy seguro de entender tu consulta.**
+
+**💡 Puedo ayudarte con:**
+• **Fechas** de parciales y entregas
+• **Primeros pasos** para comenzar la materia
+• **Actividades** del curso (E-Lab, foros, clases)
+• **Horarios** de clases virtuales (AVS)
+• **Docentes** y contactos
+• **Condiciones** de aprobación y regularidad
+• **Ausencias** y asistencia (no obligatoria)
+• **Grupos** y formación de equipos
+• **Contrato pedagógico** y responsabilidades
+• **Calendario** académico oficial (fechas institucionales)
+• **Campus virtual** y sistemas
+
+**Ejemplo:** "¿Cuándo son los parciales?" o "¿Cómo se aprueba?"`;
+  };
+
+  const enviarMensaje = () => {
+    if (!inputMessage.trim()) return;
+
+    const mensajeUsuario = {
+      id: Date.now(),
+      texto: inputMessage,
+      usuario: true
+    };
+
+    const respuestaBot = {
+      id: Date.now() + 1,
+      texto: encontrarRespuesta(inputMessage),
+      usuario: false
+    };
+
+    setMessages([...messages, mensajeUsuario, respuestaBot]);
+    setInputMessage('');
+  };
+
+  const manejarEnter = (e) => {
+    if (e.key === 'Enter') {
+      enviarMensaje();
+    }
+  };
+
+  const formatearTexto = (texto) => {
+    return texto
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br/>');
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg border">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-gray-800 to-black text-white p-4 rounded-t-lg">
+        <div className="flex items-center space-x-3">
+          <div className="bg-white/20 p-2 rounded-lg">
+            <GastionAvatar size={32} />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold">Gastión</h1>
+            <p className="text-gray-300 text-sm">Información importante de la materia</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Chat Area */}
+      <div className="h-96 overflow-y-auto p-4 bg-gray-50">
+        {messages.length === 0 && (
+          <div className="text-center text-gray-500 mt-4">
+            <div className="flex justify-center mb-4">
+              <GastionAvatar size={64} />
+            </div>
+            <p className="text-lg font-semibold text-gray-800">¡Hola! Soy Gastión</p>
+            <p className="text-sm mt-2 text-gray-600">Tu asistente para la materia Gestión del Conocimiento</p>
+            
+            <div className="mt-6 grid grid-cols-2 gap-4 text-xs max-w-md mx-auto">
+              <button
+                onClick={() => setInputMessage('¿Cuándo son los parciales?')}
+                className="bg-blue-50 p-3 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors cursor-pointer"
+              >
+                <Calendar className="mx-auto text-blue-600 mb-2" size={20} />
+                <p className="font-semibold text-blue-800">Fechas importantes</p>
+                <p className="text-blue-600">Parciales, entregas, finales</p>
+              </button>
+              <button
+                onClick={() => setInputMessage('¿Cuáles son los horarios?')}
+                className="bg-slate-50 p-3 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <Clock className="mx-auto text-slate-600 mb-2" size={20} />
+                <p className="font-semibold text-slate-800">Horarios</p>
+                <p className="text-slate-600">Cursado y consultas</p>
+              </button>
+              <button
+                onClick={() => setInputMessage('¿Cómo se aprueba la materia?')}
+                className="bg-gray-50 p-3 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
+              >
+                <AlertCircle className="mx-auto text-gray-600 mb-2" size={20} />
+                <p className="font-semibold text-gray-800">Aprobación</p>
+                <p className="text-gray-600">Promoción y regularidad</p>
+              </button>
+              <button
+                onClick={() => setInputMessage('¿Quiénes son los docentes?')}
+                className="bg-slate-100 p-3 rounded-lg border border-slate-300 hover:bg-slate-200 transition-colors cursor-pointer"
+              >
+                <Users className="mx-auto text-slate-700 mb-2" size={20} />
+                <p className="font-semibold text-slate-800">Docentes</p>
+                <p className="text-slate-700">Cátedra y contactos</p>
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {messages.map((mensaje) => (
+          <div key={mensaje.id} className={`mb-4 flex ${mensaje.usuario ? 'justify-end' : 'justify-start'}`}>
+            <div className={`flex items-start space-x-2 max-w-lg ${mensaje.usuario ? 'flex-row-reverse space-x-reverse' : ''}`}>
+              <div className={`p-2 rounded-full ${mensaje.usuario ? 'bg-blue-600' : 'bg-gray-700'}`}>
+                {mensaje.usuario ? <User size={16} className="text-white" /> : <GastionAvatar size={16} />}
+              </div>
+              <div className={`p-3 rounded-lg ${mensaje.usuario ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200'}`}>
+                <div 
+                  className="text-sm whitespace-pre-line"
+                  dangerouslySetInnerHTML={{__html: formatearTexto(mensaje.texto)}}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Input Area */}
+      <div className="p-4 border-t border-gray-200 bg-white rounded-b-lg">
+        {/* Botones rápidos */}
+        <div className="mb-3 flex flex-wrap gap-2">
+          <button
+            onClick={() => setInputMessage('¿Cuándo son los parciales?')}
+            className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full hover:bg-blue-200 flex items-center gap-1"
+          >
+            <Calendar size={12} />
+            Fechas parciales
+          </button>
+          <button
+            onClick={() => setInputMessage('¿Cómo se aprueba la materia?')}
+            className="text-xs bg-slate-100 text-slate-700 px-3 py-1 rounded-full hover:bg-slate-200 flex items-center gap-1"
+          >
+            <GraduationCap size={12} />
+            Aprobación
+          </button>
+          <button
+            onClick={() => setInputMessage('¿Cuáles son los primeros pasos?')}
+            className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full hover:bg-gray-200 flex items-center gap-1"
+          >
+            <AlertCircle size={12} />
+            Primeros pasos
+          </button>
+          <button
+            onClick={() => setInputMessage('¿Quiénes son los docentes?')}
+            className="text-xs bg-slate-200 text-slate-800 px-3 py-1 rounded-full hover:bg-slate-300 flex items-center gap-1"
+          >
+            <Users size={12} />
+            Docentes
+          </button>
+        </div>
+
+        {/* Input */}
+        <div className="flex space-x-2">
+          <input
+            type="text"
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            onKeyPress={manejarEnter}
+            placeholder="Pregúntame sobre fechas, horarios, docentes, aprobación..."
+            className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+          />
+          <button
+            onClick={enviarMensaje}
+            disabled={!inputMessage.trim()}
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white p-2 rounded-lg"
+          >
+            <Send size={20} />
+          </button>
+        </div>
+
+        {/* Footer */}
+        <p className="text-xs text-gray-500 text-center mt-2">
+          🎓 **UTN - Gestión del Conocimiento** • Información administrativa actualizada
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default GastianBasico;
